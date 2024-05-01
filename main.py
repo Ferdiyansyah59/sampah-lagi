@@ -2,7 +2,6 @@ import torch
 import torchvision.models as models
 import torch.nn as nn
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
 import warnings
 from skimage import io
 from torchvision.transforms import transforms
@@ -11,6 +10,7 @@ from flask_cors import CORS
 import cv2
 import numpy as np
 from skimage.transform import resize
+import os
 warnings.filterwarnings("ignore", category=UserWarning) 
 
 classes = ['battery', 'cardboard', 'clothes', 'glass', 'human', 'metal', 'organic', 'paper', 'plastic', 'shoes', 'styrofoam']
@@ -97,7 +97,7 @@ def pre_pre(img_param):
     im = cv2.cvtColor(im, cv2.COLOR_RGBA2RGB)
     to = transforms.ToTensor()
     im = to(im)
-    plt.imshow(im.permute(1, 2, 0))
+    # plt.imshow(im.permute(1, 2, 0))
     
     return predict_image(im, newmodel)
 
@@ -129,4 +129,4 @@ def test():
     return 'Hallow ddd'
     
 if __name__ == "__main__":
-    app.run()
+    app.run(port=int(os.environ.get("PORT", 8080)),host='0.0.0.0',debug=True)
