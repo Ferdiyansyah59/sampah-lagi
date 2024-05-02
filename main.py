@@ -7,7 +7,7 @@ from skimage import io
 from torchvision.transforms import transforms
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
-import cv2
+# import cv2
 import numpy as np
 from skimage.transform import resize
 import os
@@ -94,7 +94,7 @@ def pre_pre(img_param):
                        anti_aliasing=True)
         im = im.astype(np.float32)
     
-    im = cv2.cvtColor(im, cv2.COLOR_RGBA2RGB)
+    # im = cv2.cvtColor(im, cv2.COLOR_RGBA2RGB)
     to = transforms.ToTensor()
     im = to(im)
     # plt.imshow(im.permute(1, 2, 0))
