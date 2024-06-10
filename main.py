@@ -1,7 +1,6 @@
 import torch
 import torchvision.models as models
 import torch.nn as nn
-import torch.nn.functional as F
 import warnings
 from skimage import io
 from torchvision.transforms import transforms
@@ -12,41 +11,9 @@ import numpy as np
 from skimage.transform import resize
 import os
 warnings.filterwarnings("ignore", category=UserWarning) 
-
 classes = ['battery', 'cardboard', 'clothes', 'glass', 'human', 'metal', 'organic', 'paper', 'plastic', 'shoes', 'styrofoam']
-def accuracy(outputs, labels):
-    _, preds = torch.max(outputs, dim=1)
-    return torch.tensor(torch.sum(preds == labels).item() / len(preds))
 
-class ImageClassificationBase(nn.Module):
-    def training_step(self, batch):
-        images, labels = batch
-        out = self(images)
-        loss = F.cross_entropy(out, labels)
-        return loss
-
-    def validation_step(self, batch):
-        images, labels = batch
-        out = self(images)
-
-        loss = F.cross_entropy(out, labels)
-        acc = accuracy(out, labels)
-
-        return {'val_loss': loss.detach(), 'val_acc': acc}
-
-    def validation_epoch_end(self, outputs):
-        batch_loss = [x['val_loss'] for x in outputs]
-        epoch_loss = torch.stack(batch_loss).mean()
-
-        batch_accs = [x['val_acc'] for x in outputs]
-        epoch_acc = torch.stack(batch_accs).mean()
-
-        return {'val_loss': epoch_loss.item(), 'val_acc': epoch_acc.item()}
-
-    def epoch_end(self, epoch, result):
-        print("Epoch {}: train_loss: {:.4f}, val_loss: {:.4f}, val_acc: {:.4f}, time: {:.4f}".format(epoch+1, result['train_loss'], result['val_loss'], result['val_acc'], result['time']))
-
-class ResNet(ImageClassificationBase):
+class ResNet(nn.Module):
     def __init__(self):
         super().__init__()
         # Use a pretrained model
@@ -60,20 +27,12 @@ class ResNet(ImageClassificationBase):
 
 model = ResNet()
 
-device = torch.device("cpu")
-
-def to_device(data, device):
-    """Move tensor(s) to chosen device"""
-    if isinstance(data, (list,tuple)):
-        return [to_device(x, device) for x in data]
-    return data.to(device, non_blocking=True)
-
-model = to_device(ResNet(), device)
-
 newmodel = torch.load("sampah.pth", map_location='cpu')
 
+
+
 def predict_image(img, model):
-    xb = to_device(img.unsqueeze(0), device)
+    xb = torch.unsqueeze(img, 0)
     yb = model(xb)
     prob, preds = torch.max(yb, dim=1)
 
