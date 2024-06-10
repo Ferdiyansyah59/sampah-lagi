@@ -27,9 +27,9 @@ class ResNet(nn.Module):
 
 model = ResNet()
 
-newmodel = torch.load("sampah.pth", map_location='cpu')
-
-
+# Load the state_dict into the model
+model.load_state_dict(torch.load("sampah.pth", map_location='cpu'))
+model.eval()  # Set model to evaluation mode
 
 def predict_image(img, model):
     xb = torch.unsqueeze(img, 0)
@@ -58,8 +58,7 @@ def pre_pre(img_param):
     im = to(im)
     # plt.imshow(im.permute(1, 2, 0))
     
-    return predict_image(im, newmodel)
-
+    return predict_image(im, model)
 
 app = Flask(__name__)
 CORS(app)
@@ -80,12 +79,10 @@ def sampah():
         return make_response(jsonify(data)), 200
     except requests.exceptions.HTTPError as err:
         raise SystemExit(err)
-    
-    
 
 @app.route('/test', methods=['GET'])
 def test():
     return 'Hallow ddd'
-    
+
 if __name__ == "__main__":
     app.run(port=int(os.environ.get("PORT", 8080)),host='0.0.0.0',debug=True)
